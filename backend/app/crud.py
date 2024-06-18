@@ -2,24 +2,54 @@
 
 from sqlalchemy.orm import Session
 from . import models, schemas
+import requests
+
+JSONPLACEHOLDER_URL = "https://jsonplaceholder.typicode.com"
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+    try:
+        response = requests.get(f"{JSONPLACEHOLDER_URL}/users/{user_id}")
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as err:
+        print(f"HTTP error occurred: {err}")
+        return None
+    except requests.exceptions.RequestException as err:
+        print(f"Other error occurred: {err}")
+        return None
 
 def create_user(db: Session, user: schemas.UserCreate):
-    fake_hashed_password = user.password + "notsecure"
-    db_user = models.User(email=user.email, hashed_password=fake_hashed_password)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    try:
+        response = requests.post(f"{JSONPLACEHOLDER_URL}/users/", json={"email": user.email})
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as err:
+        print(f"HTTP error occurred: {err}")
+        return None
+    except requests.exceptions.RequestException as err:
+        print(f"Other error occurred: {err}")
+        return None
 
 def get_anime(db: Session, anime_id: int):
-    return db.query(models.Anime).filter(models.Anime.id == anime_id).first()
+    try:
+        response = requests.get(f"{JSONPLACEHOLDER_URL}/posts/{anime_id}")
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as err:
+        print(f"HTTP error occurred: {err}")
+        return None
+    except requests.exceptions.RequestException as err:
+        print(f"Other error occurred: {err}")
+        return None
 
 def create_anime(db: Session, anime: schemas.AnimeCreate):
-    db_anime = models.Anime(title=anime.title, description=anime.description, rating=anime.rating)
-    db.add(db_anime)
-    db.commit()
-    db.refresh(db_anime)
-    return db_anime
+    try:
+        response = requests.post(f"{JSONPLACEHOLDER_URL}/posts/", json={"title": anime.title, "body": anime.description, "userId": anime.rating})
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as err:
+        print(f"HTTP error occurred: {err}")
+        return None
+    except requests.exceptions.RequestException as err:
+        print(f"Other error occurred: {err}")
+        return None
